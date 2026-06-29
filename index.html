@@ -972,6 +972,21 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .swipe-actions button{flex:1;border-radius:14px;padding:14px;font-size:14px;font-weight:700;border:0}
   .btn-skip{background:var(--surface);border:1px solid var(--line)!important;color:var(--muted)}
   .btn-add{background:var(--persimmon);color:#fff}
+  .subcta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:1px solid var(--line);background:var(--surface);color:var(--sea);border-radius:14px;padding:12px;margin:-4px 0 12px;font-size:14px;font-weight:700}
+  .subcta svg{width:16px;height:16px}
+  .legtag{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--plum);background:#f1e6ea;border-radius:6px;padding:2px 7px}
+  .me-dot{width:18px;height:18px;border-radius:50%;background:#1b74e4;border:3px solid #fff;box-shadow:0 0 0 4px rgba(27,116,228,.3),0 1px 4px rgba(0,0,0,.4)}
+  .change-ans{color:var(--sea);font-weight:600;text-decoration:underline}
+  .book-search{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-size:15px;font-family:var(--sans);margin-bottom:4px;background:var(--surface)}
+  .book-body{overflow:auto;flex:1;padding-right:2px}
+  .book-sec{margin-top:16px}
+  .book-sec h4{font-family:var(--serif);font-weight:400;font-size:18px;margin:0 0 6px;color:var(--ink)}
+  .phrase{padding:9px 0;border-top:1px solid var(--line)}
+  .phrase .e{font-weight:700;color:var(--ink)}
+  .phrase .p{font-style:italic;color:var(--muted);font-size:13px;margin-left:6px}
+  .phrase .m{display:block;font-size:13.5px;color:#26403c;margin-top:1px}
+  .book-note{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;font-size:13.5px;line-height:1.5}
+  .book-note b{color:var(--ink)}
 </style>
 </head>
 <body>
@@ -1006,6 +1021,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       <button data-sort="distance" aria-pressed="false">Nearest to me</button>
     </div>
   </div>
+  <div id="sortNote" class="flabel" hidden style="width:100%;margin-top:-2px">Nearest across your whole trip · straight-line distance from you.</div>
 </div>
 
 <main id="appMain" hidden>
@@ -1013,8 +1029,16 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.8L19 9.7l-3.8 3.2L16 18l-4-2.6L8 18l.8-5.1L5 9.7l5.1-1.9z"/></svg>
     What should we do next?
   </button>
+  <button id="bookCta" class="subcta" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Pintxos &amp; phrasebook
+  </button>
   <section id="mapPanel" hidden>
     <div class="mapbar">
+      <button id="locateBtn" class="routeclear" type="button" title="Show my location">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        Locate me
+      </button>
       <button id="routeBtn" class="routebtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 18.5h6a3.5 3.5 0 0 0 0-7h-5a3.5 3.5 0 0 1 0-7h5"/></svg>
         Add must-sees
@@ -1072,6 +1096,14 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="deck-wrap"><div id="deck" class="deck"></div></div>
     <div id="deckDots" class="dots-row"></div>
     <div id="nextStatus" class="next-status"></div>
+  </div>
+</div>
+
+<div id="bookModal" class="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-label="Phrasebook" style="max-height:92vh">
+    <div class="modal-head"><span class="modal-title">Pintxos &amp; phrasebook</span><button id="bookClose" class="modal-close" aria-label="Close">×</button></div>
+    <input id="bookSearch" class="book-search" type="search" placeholder="Search words or phrases…" autocomplete="off">
+    <div id="bookBody" class="book-body"></div>
   </div>
 </div>
 
@@ -1744,8 +1776,9 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
     var n=0; for(var i=0;i<item.cats.length;i++){ if(state.cats[item.cats[i]]) n++; } return n;
   }
   function filtered(){
+    var crossTrip = (state.sort==='distance' && state.userPos);
     var list = EXP.map(function(it,idx){ return {it:it, idx:idx}; })
-      .filter(function(r){ return r.it.leg === state.leg; })
+      .filter(function(r){ return crossTrip ? true : r.it.leg === state.leg; })
       .filter(function(r){ return state.stage==='all' ? true : r.it.stage===state.stage; })
       .filter(function(r){ return state.kids ? r.it.family===1 : true; });
     list.sort(function(a,b){
@@ -1790,6 +1823,7 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
       bannerSVG(item)+
       '<div class="top"><h3>'+esc(item.name)+'</h3>'+badgeFor(item.tier)+'</div>'+
       '<div class="meta"><span class="area">'+esc(item.area)+'</span>'+
+        (state.sort==='distance'&&state.userPos ? '<span class="legtag">'+esc(legObj(item.leg).name)+'</span>' : '')+
         '<span class="stagepill">'+stageLabel(item.stage)+'</span>'+
         (state.userPos&&item.lat!==undefined ? '<span class="distpill">'+fmtDist(distOf(item))+'</span>' : '')+
         dotsFor(item.cats)+ kid +
@@ -1870,6 +1904,7 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
         Array.prototype.forEach.call(rail.children,function(c){c.setAttribute('aria-pressed','false');});
         b.setAttribute('aria-pressed','true');
         route=[]; gpsPos=null;
+        if(state.sort==='distance'){ state.sort='guide'; var sg=document.getElementById('sortSeg'); if(sg){ Array.prototype.forEach.call(sg.children,function(c){ c.setAttribute('aria-pressed', c.getAttribute('data-sort')==='guide'?'true':'false'); }); } var sn=document.getElementById('sortNote'); if(sn) sn.hidden=true; }
         setNote(); render();
         try{ window.scrollTo({top:0, behavior:'smooth'}); }catch(e){ try{window.scrollTo(0,0);}catch(_){} }
         if(b.scrollIntoView){ b.scrollIntoView({inline:'center', block:'nearest', behavior:'smooth'}); }
@@ -1922,19 +1957,29 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
         var b=e.target.closest('button'); if(!b) return;
         var v=b.getAttribute('data-sort');
         if(v==='distance'){
-          if(state.userPos){ applySort('distance'); return; }
+          if(state.userPos){ applySort('distance'); refreshPos(); return; }
           var lbl=b.textContent; b.textContent='Locating…';
           getPosition().then(function(pos){
             b.textContent=lbl;
-            if(pos){ state.userPos=pos; applySort('distance'); }
+            if(pos){ state.userPos=pos; if(typeof updateUserMarker==='function') updateUserMarker(); applySort('distance'); }
             else { applySort('guide'); b.textContent='Location off'; setTimeout(function(){ b.textContent=lbl; },1800); }
           });
         } else { applySort('guide'); }
       });
     }
+    function refreshPos(){
+      getPosition().then(function(pos){
+        if(!pos) return;
+        var moved = !state.userPos || haversine(state.userPos,pos) > 0.3;
+        state.userPos = pos;
+        if(typeof updateUserMarker==='function') updateUserMarker();
+        if(moved && state.sort==='distance') render();
+      });
+    }
     function applySort(v){
       state.sort=v; state.picksOffset=0;
       var seg=$('#sortSeg'); if(seg) Array.prototype.forEach.call(seg.children,function(c){ c.setAttribute('aria-pressed', c.getAttribute('data-sort')===v?'true':'false'); });
+      var sn=$('#sortNote'); if(sn) sn.hidden = (v!=='distance');
       render();
     }
   }
@@ -1966,6 +2011,7 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
       setTimeout(function(){ try{ map.invalidateSize(); }catch(e){} }, 200);
       updateMap(lastList.length?lastList:filtered());
       renderRouteList();
+      if(state.userPos) updateUserMarker();
     }catch(e){ note('The map could not start here, but everything else works.'); }
   }
   function note(msg){ var n=$('#mapNote'); if(n) n.textContent=msg||''; }
@@ -2025,6 +2071,27 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
     if(!mapReady||it.lat===undefined) return;
     setTimeout(function(){ map.setView([it.lat,it.lng],14,{animate:true}); var m=markersByName[it.name]; if(m) m.openPopup(); },250);
   }
+  var userMarker=null;
+  function updateUserMarker(){
+    if(!mapReady || !state.userPos || !window.L) return;
+    if(userMarker){ userMarker.setLatLng(state.userPos); }
+    else {
+      userMarker = L.marker(state.userPos,{icon:L.divIcon({className:'',html:'<div class="me-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]}), zIndexOffset:1000}).bindPopup('<b>You are here</b>');
+      userMarker.addTo(map);
+    }
+  }
+  function locateMe(){
+    if(!window.L) return; initMap();
+    var btn=document.getElementById('locateBtn'); var orig=btn?btn.innerHTML:'';
+    if(btn){ btn.disabled=true; btn.textContent='Locating…'; }
+    getPosition().then(function(pos){
+      if(btn){ btn.disabled=false; btn.innerHTML=orig; }
+      if(!pos){ note('Couldn’t get your location — check Location access for Safari.'); return; }
+      state.userPos=pos; updateUserMarker();
+      if(mapReady){ map.setView(pos, 12, {animate:true}); }
+      note('');
+    });
+  }
 
   // ---- routing ----
   function haversine(a,b){
@@ -2060,7 +2127,7 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
       navigator.geolocation.getCurrentPosition(
         function(p){ resolve([p.coords.latitude,p.coords.longitude]); },
         function(){ resolve(null); },
-        {enableHighAccuracy:false, timeout:8000, maximumAge:600000}
+        {enableHighAccuracy:false, timeout:8000, maximumAge:120000}
       );
     });
   }
@@ -2206,13 +2273,13 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
     if(h>=19&&h<22) return pc==='food'?3:(sunset?3:(pc==='village'?2:1));
     return pc==='food'?2:(pc==='village'?1:0);
   }
-  function rankNext(origin){
+  function rankAll(origin){
     var out=[];
     for(var i=0;i<EXP.length;i++){ var it=EXP[i]; if(it.lat===undefined) continue;
       var d=haversine(origin,[it.lat,it.lng]);
-      if(swAns.range==='close' && d>20) continue;
-      if(swAns.range==='far' && d>70) continue;
-      var distScore = swAns.range==='close' ? Math.max(0,18-d) : Math.max(0,16-d/4);
+      // range no longer excludes — it just shapes how strongly distance counts,
+      // so once the close ones run out the feed naturally widens to farther spots.
+      var distScore = swAns.range==='close' ? Math.max(0,30-d*1.1) : Math.max(0,26-d/4);
       var isFood = it.cats.indexOf('food')>-1;
       var mood = swAns.mood==='eat' ? (isFood?7:-3) : (isFood?-1:4);
       var act = effortActive(it);
@@ -2223,10 +2290,7 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
       out.push({it:it,d:d,score:score});
     }
     out.sort(function(a,b){ return b.score-a.score; });
-    var seen={}, picked=[], j;
-    for(j=0;j<out.length && picked.length<3;j++){ if(seen[out[j].it.area]) continue; seen[out[j].it.area]=1; picked.push(out[j]); }
-    for(j=0;j<out.length && picked.length<3;j++){ if(picked.indexOf(out[j])===-1) picked.push(out[j]); }
-    return picked;
+    return out;
   }
   function whyText(r){
     var d=r.d, parts=[];
@@ -2244,18 +2308,21 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
     nstatus('Finding something near you…');
     getPosition().then(function(pos){
       var origin = pos || legCenter();
-      swResults = rankNext(origin);
+      swResults = rankAll(origin);
       resIdx=0;
-      if(!swResults.length){ nstatus('Nothing fits those swipes nearby — try “a short drive”.'); return; }
+      if(!swResults.length){ nstatus('No mappable spots found.'); return; }
       nstatus(pos ? '' : 'Using '+legObj(state.leg).name+' as your location — allow location for nearer picks.');
       renderResult();
     });
   }
+  function advanceResult(){ resIdx++; renderResult(); }
   function renderResult(){
     var deck=document.getElementById('deck'); deck.innerHTML=''; renderDots();
+    // skip anything already in the route so it isn't offered twice
+    while(resIdx<swResults.length && inRoute(swResults[resIdx].it.name)) resIdx++;
     if(resIdx>=swResults.length){
       var done=ce('div','swipecard q-card');
-      done.innerHTML='<p class="q">That’s my shortlist.</p><p class="swipe-hint">Want a fresh set?</p><div class="swipe-actions" style="margin-top:20px;width:100%"><button class="btn-add" id="againBtn" type="button">Start over</button></div>';
+      done.innerHTML='<p class="q">You’ve seen everything that fits.</p><p class="swipe-hint">Want a fresh set with different answers?</p><div class="swipe-actions" style="margin-top:20px;width:100%"><button class="btn-add" id="againBtn" type="button">Change answers</button></div>';
       deck.appendChild(done); $('#againBtn',done).addEventListener('click', openNext); nstatus(''); return;
     }
     var r=swResults[resIdx], it=r.it;
@@ -2264,7 +2331,7 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
       '<div class="res-banner">'+bannerSVG(it)+'</div>'+
       '<div class="res-body">'+
         '<div class="res-name">'+esc(it.name)+'</div>'+
-        '<div class="res-why">'+esc(whyText(r))+'</div>'+
+        '<div class="res-why">'+esc(whyText(r))+'  ·  '+esc(legObj(it.leg).name)+'</div>'+
         '<div class="res-desc">'+esc(it.desc)+'</div>'+
         '<div class="res-actions">'+
           '<a class="primary" href="'+mapURL(it)+'" target="_blank" rel="noopener">Open in Maps</a>'+
@@ -2272,13 +2339,14 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
         '</div>'+
       '</div>'+
       '<div class="swipe-actions"><button class="btn-skip" type="button">Skip ✗</button><button class="btn-add" type="button">Add to route ✓</button></div>'+
-      '<p class="swipe-hint" style="text-align:center;margin:10px 0 0">'+(resIdx+1)+' of '+swResults.length+'  ·  swipe ✓ add / ✗ skip</p>';
+      '<p class="swipe-hint" style="text-align:center;margin:10px 0 0">swipe ✓ add / ✗ skip · keep going · <span class="change-ans">change answers</span></p>';
     deck.appendChild(card);
     var rbn=$('.res-banner .banner',card); if(rbn) applyPhoto(rbn, it);
     $('.res-map',card).addEventListener('click',function(){ closeNext(); focusOnMap(it); });
-    $('.btn-skip',card).addEventListener('click',function(){ flyOff(card,'left',function(){ resIdx++; renderResult(); }); });
-    $('.btn-add',card).addEventListener('click',function(){ toggleRoute(it.name); flyOff(card,'right',function(){ resIdx++; renderResult(); }); });
-    makeDraggable(card,function(dir){ if(dir==='right'){ toggleRoute(it.name); } flyOff(card,dir,function(){ resIdx++; renderResult(); }); });
+    $('.btn-skip',card).addEventListener('click',function(){ flyOff(card,'left',advanceResult); });
+    $('.btn-add',card).addEventListener('click',function(){ toggleRoute(it.name); flyOff(card,'right',advanceResult); });
+    $('.change-ans',card).addEventListener('click', openNext);
+    makeDraggable(card,function(dir){ if(dir==='right'){ toggleRoute(it.name); } flyOff(card,dir,advanceResult); });
   }
 
   // ---- location photos (Wikipedia thumbnails, online; the illustration is the fallback) ----
@@ -2309,6 +2377,79 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
     ents.forEach(function(en){ if(en.isIntersecting){ var el=en.target; bannerObs.unobserve(el); applyPhoto(el, BYNAME[el.getAttribute('data-name')]); } });
   },{rootMargin:'250px'}) : null;
 
+  // ================= PINTXOS & PHRASEBOOK =================
+  var PHRASE=[
+    {title:'Basics', items:[
+      {e:'Kaixo · Hola', p:'KY-sho · OH-la', m:'Hello'},
+      {e:'Egun on · Buenos días', p:'EH-goon on', m:'Good morning'},
+      {e:'Arratsalde on · Buenas tardes', p:'a-rrats-AL-deh on', m:'Good afternoon'},
+      {e:'Agur · Adiós', p:'ah-GOOR', m:'Goodbye'},
+      {e:'Eskerrik asko · Gracias', p:'es-KEH-rreek AS-ko', m:'Thank you'},
+      {e:'Mesedez · Por favor', p:'meh-SEH-des', m:'Please'},
+      {e:'Bai · Ez', p:'buy · es', m:'Yes · No'},
+      {e:'Barkatu · Perdón', p:'bar-KA-too', m:'Excuse me / sorry'},
+      {e:'¿Habla inglés?', p:'AH-bla een-GLES', m:'Do you speak English?'},
+      {e:'Topa! · ¡Salud!', p:'TOH-pa', m:'Cheers!'},
+      {e:'¿Cuánto es?', p:'KWAN-to es', m:'How much is it?'},
+      {e:'La cuenta, por favor', p:'la KWEN-ta', m:'The bill, please'},
+      {e:'¿El baño? · Komuna', p:'el BA-nyo', m:'The toilet?'}
+    ]},
+    {title:'Ordering pintxos & drinks', items:[
+      {e:'Un pintxo, por favor', p:'oon PEEN-cho', m:'One pintxo, please'},
+      {e:'Dos pintxos', p:'dos PEEN-chos', m:'Two pintxos'},
+      {e:'Este, por favor', p:'ES-teh', m:'This one, please (point)'},
+      {e:'¿Qué recomienda?', p:'keh reh-ko-MYEN-da', m:'What do you recommend?'},
+      {e:'Un txakoli', p:'cha-ko-LEE', m:'A glass of txakoli (local white)'},
+      {e:'Una sidra · Sagardoa', p:'SEE-dra · sa-gar-DOH-a', m:'A cider'},
+      {e:'Un zurito', p:'thoo-REE-to', m:'A small glass of beer'},
+      {e:'Una caña', p:'KA-nya', m:'A small draught beer'},
+      {e:'Un kalimotxo', p:'ka-lee-MO-cho', m:'Red wine + cola'},
+      {e:'Vino tinto · blanco', p:'VEE-no TEEN-to', m:'Red · white wine'},
+      {e:'Agua con/sin gas', p:'AH-gwa', m:'Sparkling / still water'},
+      {e:'Un cortado', p:'kor-TA-do', m:'Espresso with a little milk'},
+      {e:'Otra ronda', p:'OH-tra RON-da', m:'Another round'},
+      {e:'Para llevar', p:'PA-ra yeh-VAR', m:'To take away'}
+    ]},
+    {title:'On the menu', items:[
+      {e:'Gilda', p:'GEEL-da', m:'The original pintxo: olive, anchovy & guindilla pepper on a stick'},
+      {e:'Txuleta / Txuletón', p:'choo-LEH-ta', m:'Aged bone-in beef steak, grilled'},
+      {e:'Bacalao al pil-pil', p:'ba-ka-LA-o', m:'Salt cod in a silky garlic-olive-oil sauce'},
+      {e:'Anchoa · Boquerón', p:'an-CHO-a', m:'Cured anchovy · anchovy in vinegar'},
+      {e:'Kokotxas', p:'ko-KO-chas', m:'Hake/cod cheeks — a prized delicacy'},
+      {e:'Txangurro', p:'chan-GOO-rro', m:'Spider crab, usually baked'},
+      {e:'Marmitako', p:'mar-mee-TA-ko', m:'Tuna & potato fishermen’s stew'},
+      {e:'Idiazabal', p:'ee-dya-THA-bal', m:'Smoked sheep’s-milk cheese'},
+      {e:'Chipirones en su tinta', p:'chee-pee-RO-nes', m:'Small squid in their ink'},
+      {e:'Percebes', p:'per-THE-bes', m:'Gooseneck barnacles (prized, pricey)'},
+      {e:'Menú del día', p:'meh-NOO del DEE-a', m:'Fixed-price multi-course lunch — great value'},
+      {e:'Ración · Media ración', p:'ra-THYON', m:'Full · half sharing plate'}
+    ]}
+  ];
+  var NOTES=[
+    {t:'How pintxo bars work.', b:'Cold pintxos sit out on the bar — take a plate, help yourself, keep your toothpicks, and pay on the way out (they count the sticks). Hot ones are ordered from a list. It’s an honest system; don’t be shy.'},
+    {t:'Txikiteo (the bar crawl).', b:'The local rhythm is one drink + one pintxo per bar, then move on to the next. Quality over quantity.'},
+    {t:'Txakoli.', b:'Poured from a height to aerate it — let the bartender do the pour. Slightly fizzy, low in alcohol, perfect with seafood.'},
+    {t:'Cider houses (sagardotegi).', b:'When you hear “Txotx!”, line up at the barrel and catch a thin stream in your glass. Drink it fresh, a couple of fingers at a time.'},
+    {t:'Meal times run late.', b:'Lunch is around 14:00, dinner around 21:00, and many kitchens close between roughly 16:00 and 20:00.'},
+    {t:'Tipping.', b:'Not expected. Round up or leave small change for good service.'},
+    {t:'Language.', b:'Basque (Euskara) and Spanish are both official. A word of Basque — eskerrik asko — is always appreciated.'}
+  ];
+  function openBook(){ var m=document.getElementById('bookModal'); if(!m) return; m.hidden=false; var s=$('#bookSearch'); if(s) s.value=''; renderBook(''); }
+  function closeBook(){ var m=document.getElementById('bookModal'); if(m) m.hidden=true; }
+  function renderBook(q){
+    q=(q||'').trim().toLowerCase();
+    var body=document.getElementById('bookBody'); if(!body) return; body.innerHTML='';
+    PHRASE.forEach(function(sec){
+      var items=sec.items.filter(function(it){ return !q || (it.e+' '+it.m+' '+(it.p||'')).toLowerCase().indexOf(q)>-1; });
+      if(!items.length) return;
+      var wrap=ce('div','book-sec'); var h=ce('h4'); h.textContent=sec.title; wrap.appendChild(h);
+      items.forEach(function(it){ var row=ce('div','phrase'); row.innerHTML='<span class="e">'+esc(it.e)+'</span>'+(it.p?'<span class="p">'+esc(it.p)+'</span>':'')+'<span class="m">'+esc(it.m)+'</span>'; wrap.appendChild(row); });
+      body.appendChild(wrap);
+    });
+    NOTES.forEach(function(n){ if(q && (n.t+' '+n.b).toLowerCase().indexOf(q)<0) return; var nd=ce('div','book-note'); nd.innerHTML='<b>'+esc(n.t)+'</b> '+esc(n.b); body.appendChild(nd); });
+    if(!body.children.length){ var e=ce('div','book-note'); e.textContent='No matches — try another word.'; body.appendChild(e); }
+  }
+
   // ---- init ----
   // scripts are running: switch from the static fallback to the interactive app
   ['railWrap','noteBox','filterBox','appMain'].forEach(function(id){ var e=document.getElementById(id); if(e) e.hidden=false; });
@@ -2326,6 +2467,7 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
     var rb=document.getElementById('routeBtn'); if(rb) rb.addEventListener('click', addMustSees);
     var ro=document.getElementById('reoptBtn'); if(ro) ro.addEventListener('click', reoptimise);
     var rc=document.getElementById('routeClear'); if(rc) rc.addEventListener('click', clearRoute);
+    var lb=document.getElementById('locateBtn'); if(lb) lb.addEventListener('click', locateMe);
     // add/remove from any card button or map popup link
     document.addEventListener('click', function(e){
       var t = e.target.closest ? e.target.closest('.routetoggle') : null;
@@ -2340,7 +2482,12 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
   var nx=document.getElementById('nextClose'); if(nx) nx.addEventListener('click', closeNext);
   var modal=document.getElementById('nextModal');
   if(modal) modal.addEventListener('click', function(e){ if(e.target===modal) closeNext(); });
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeNext(); } });
+  // phrasebook
+  var bcta=document.getElementById('bookCta'); if(bcta) bcta.addEventListener('click', openBook);
+  var bclose=document.getElementById('bookClose'); if(bclose) bclose.addEventListener('click', closeBook);
+  var bsearch=document.getElementById('bookSearch'); if(bsearch) bsearch.addEventListener('input', function(){ renderBook(this.value); });
+  var bmodal=document.getElementById('bookModal'); if(bmodal) bmodal.addEventListener('click', function(e){ if(e.target===bmodal) closeBook(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeNext(); closeBook(); } });
 })();
 
 </script>

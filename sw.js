@@ -1,5 +1,5 @@
 /* Offline cache for the Noord-Spanje companion (GitHub Pages). */
-const CACHE = 'noord-spanje-v1';
+const CACHE = 'noord-spanje-v4';
 const ASSETS = ['./', './index.html'];
 
 self.addEventListener('install', function (e) {

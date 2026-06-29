@@ -187,6 +187,9 @@
   .meta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 2px}
   .area{font-size:12.5px;color:var(--muted)}
   .stagepill{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--sea);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:2px 7px}
+  .distpill{font-size:11px;font-weight:700;color:var(--persimmon);background:var(--persimmon-soft);border-radius:6px;padding:2px 7px;display:inline-flex;align-items:center;gap:4px}
+  .banner img{width:100%;height:100%;object-fit:cover;display:block;animation:photofade .45s ease}
+  @keyframes photofade{from{opacity:0}to{opacity:1}}
   .dots{display:inline-flex;gap:4px;margin-left:2px}
   .dots i{width:8px;height:8px;border-radius:50%;display:inline-block}
   .d-food{background:var(--mustard)} .d-culture{background:var(--sea)} .d-nature{background:var(--green)} .d-village{background:var(--plum)}
@@ -996,6 +999,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
     </div>
     <button class="kid" id="kidToggle" aria-pressed="false"><span class="led"></span>Good with kids</button>
   </div>
+  <div class="frow">
+    <span class="flabel">Order</span>
+    <div class="seg" id="sortSeg" role="group" aria-label="Order">
+      <button data-sort="guide" aria-pressed="true">Guide’s pick</button>
+      <button data-sort="distance" aria-pressed="false">Nearest to me</button>
+    </div>
+  </div>
 </div>
 
 <main id="appMain" hidden>
@@ -1052,7 +1062,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 <footer>
   Your <span class="ico">Iconico Travel</span> magazine, as a pocket guide.<br>
-  Works offline. Add to your Home Screen for one-tap access.
+  Works offline. Add to your Home Screen for one-tap access.<br>
+  <span style="opacity:.8">Location photos via Wikipedia / Wikimedia Commons, where available.</span>
 </footer>
 
 <div id="nextModal" class="modal" hidden>
@@ -1653,6 +1664,48 @@ var COORDS = {
 };
 for (var _i=0; _i<EXP.length; _i++){ var _c=COORDS[EXP[_i].name]; if(_c){ EXP[_i].lat=_c[0]; EXP[_i].lng=_c[1]; } }
 
+/* ---------- Wikipedia article titles for location photos (online; illustration is the fallback) ---------- */
+var WIKI = {
+ 'Guggenheim Museum':['Guggenheim Museum Bilbao','en'],
+ 'San Juan de Gaztelugatxe':['Gaztelugatxe','en'],
+ 'Lekeitio':['Lekeitio','en'],
+ 'Vizcaya Hanging Bridge':['Vizcaya Bridge','en'],
+ 'Castillo de Butrón':['Butrón Castle','en'],
+ 'Oñati — “the Basque Toledo”':['Oñati','en'],
+ 'Santuario de Arantzazu':['Sanctuary of Arantzazu','en'],
+ 'Elantxobe':['Elantxobe','en'],
+ 'Ea':['Ea, Spain','en'],
+ 'Gernika':['Gernika-Lumo','en'],
+ 'Tazones':['Tazones','es'],
+ 'Llanes old town & harbour':['Llanes','en'],
+ 'Cangas de Onís':['Cangas de Onís','en'],
+ 'Lagos de Covadonga':['Lakes of Covadonga','en'],
+ 'Santuario de Covadonga':['Covadonga','en'],
+ 'Bulnes':['Bulnes','en'],
+ 'Las Arenas de Cabrales':['Arenas de Cabrales','en'],
+ 'Santillana del Mar':['Santillana del Mar','en'],
+ 'Cuevas de Altamira':['Cave of Altamira','en'],
+ 'San Vicente de la Barquera':['San Vicente de la Barquera','en'],
+ 'Comillas — Gaudí’s El Capricho':['El Capricho (Gaudí)','en'],
+ 'Cueva El Soplao':['El Soplao','en'],
+ 'Bárcena Mayor':['Bárcena Mayor','es'],
+ 'Liérganes':['Liérganes','en'],
+ 'Cartes':['Cartes, Cantabria','en'],
+ 'La Concha beach & promenade':['La Concha (San Sebastián)','es'],
+ 'Monte Igueldo':['Monte Igueldo','es'],
+ 'Peine del Viento (Comb of the Wind)':['The Comb of the Wind','en'],
+ 'Monte Urgull':['Monte Urgull','es'],
+ 'Catedral del Buen Pastor':['Buen Pastor Cathedral','en'],
+ 'Hondarribia':['Hondarribia','en'],
+ 'Pasaia (San Juan & San Pedro)':['Pasaia','en'],
+ 'Getaria':['Getaria, Gipuzkoa','en'],
+ 'Zarautz — “Queen of Beaches”':['Zarautz','en'],
+ 'Mutriku':['Mutriku','en'],
+ 'Deba':['Deba, Spain','en'],
+ 'Santuario de Loyola':['Sanctuary of Loyola','en']
+};
+for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w].wiki={t:_wk[0], l:_wk[1]}; } }
+
 </script>
 <script>
 (function(){
@@ -1664,6 +1717,8 @@ for (var _i=0; _i<EXP.length; _i++){ var _c=COORDS[EXP[_i].name]; if(_c){ EXP[_i
     cats: { food:true, culture:true, nature:true, village:false }, // your chosen interests
     stage: 'all',
     kids: false,
+    sort: 'guide',      // 'guide' | 'distance'
+    userPos: null,      // [lat,lng] when known
     picksOffset: 0
   };
   var CAT_ORDER = ['food','culture','nature','village'];
@@ -1694,6 +1749,11 @@ for (var _i=0; _i<EXP.length; _i++){ var _c=COORDS[EXP[_i].name]; if(_c){ EXP[_i
       .filter(function(r){ return state.stage==='all' ? true : r.it.stage===state.stage; })
       .filter(function(r){ return state.kids ? r.it.family===1 : true; });
     list.sort(function(a,b){
+      if(state.sort==='distance' && state.userPos){
+        var da=distOf(a.it), db=distOf(b.it);
+        if(da!==db) return da-db;                                        // nearest first
+        return a.idx-b.idx;
+      }
       if(a.it.tier !== b.it.tier) return a.it.tier - b.it.tier;          // must-sees first
       var ma=matchCount(a.it), mb=matchCount(b.it);
       if(ma !== mb) return mb - ma;                                       // then your interests
@@ -1701,6 +1761,8 @@ for (var _i=0; _i<EXP.length; _i++){ var _c=COORDS[EXP[_i].name]; if(_c){ EXP[_i
     });
     return list.map(function(r){return r.it;});
   }
+  function distOf(it){ return (state.userPos && it.lat!==undefined) ? haversine(state.userPos,[it.lat,it.lng]) : Infinity; }
+  function fmtDist(d){ if(d<1.5) return '~'+Math.max(2,Math.round(d/5*60))+' min walk'; if(d<10) return d.toFixed(1)+' km'; return Math.round(d)+' km'; }
 
   // ---- card rendering ----
   function badgeFor(tier){
@@ -1729,6 +1791,7 @@ for (var _i=0; _i<EXP.length; _i++){ var _c=COORDS[EXP[_i].name]; if(_c){ EXP[_i
       '<div class="top"><h3>'+esc(item.name)+'</h3>'+badgeFor(item.tier)+'</div>'+
       '<div class="meta"><span class="area">'+esc(item.area)+'</span>'+
         '<span class="stagepill">'+stageLabel(item.stage)+'</span>'+
+        (state.userPos&&item.lat!==undefined ? '<span class="distpill">'+fmtDist(distOf(item))+'</span>' : '')+
         dotsFor(item.cats)+ kid +
       '</div>'+
       '<p class="desc">'+esc(item.desc)+'</p>'+
@@ -1743,6 +1806,8 @@ for (var _i=0; _i<EXP.length; _i++){ var _c=COORDS[EXP[_i].name]; if(_c){ EXP[_i
 
     var onmapBtn = $('.onmap',card);
     if(onmapBtn){ onmapBtn.addEventListener('click',function(){ focusOnMap(item); }); }
+    var bn = $('.banner',card);
+    if(bn && item.wiki){ bn.setAttribute('data-name', item.name); if(bannerObs){ bannerObs.observe(bn); } else { applyPhoto(bn,item); } }
 
     if(hasDetail){
       var btn = $('.detailtoggle',card), det = $('.detail',card), lbl = $('span',btn);
@@ -1777,7 +1842,7 @@ for (var _i=0; _i<EXP.length; _i++){ var _c=COORDS[EXP[_i].name]; if(_c){ EXP[_i
     var picks = [];
     for(var i=0;i<pickCount;i++){ picks.push(list[(state.picksOffset + i) % list.length]); }
 
-    picksTitle.textContent = (state.kids ? 'Picks for the family' : 'Today’s picks');
+    picksTitle.textContent = (state.sort==='distance' ? 'Closest to you' : (state.kids ? 'Picks for the family' : 'Today’s picks'));
     picks.forEach(function(it){ picksWrap.appendChild(cardEl(it, true)); });
     shuffle.style.display = list.length > pickCount ? 'inline-flex' : 'none';
 
@@ -1851,6 +1916,27 @@ for (var _i=0; _i<EXP.length; _i++){ var _c=COORDS[EXP[_i].name]; if(_c){ EXP[_i
       state.picksOffset = (state.picksOffset + 2) % len;
       render();
     });
+    var sortSeg=$('#sortSeg');
+    if(sortSeg){
+      sortSeg.addEventListener('click',function(e){
+        var b=e.target.closest('button'); if(!b) return;
+        var v=b.getAttribute('data-sort');
+        if(v==='distance'){
+          if(state.userPos){ applySort('distance'); return; }
+          var lbl=b.textContent; b.textContent='Locating…';
+          getPosition().then(function(pos){
+            b.textContent=lbl;
+            if(pos){ state.userPos=pos; applySort('distance'); }
+            else { applySort('guide'); b.textContent='Location off'; setTimeout(function(){ b.textContent=lbl; },1800); }
+          });
+        } else { applySort('guide'); }
+      });
+    }
+    function applySort(v){
+      state.sort=v; state.picksOffset=0;
+      var seg=$('#sortSeg'); if(seg) Array.prototype.forEach.call(seg.children,function(c){ c.setAttribute('aria-pressed', c.getAttribute('data-sort')===v?'true':'false'); });
+      render();
+    }
   }
 
   // ================= MAP + ROUTE =================
@@ -2188,11 +2274,40 @@ for (var _i=0; _i<EXP.length; _i++){ var _c=COORDS[EXP[_i].name]; if(_c){ EXP[_i
       '<div class="swipe-actions"><button class="btn-skip" type="button">Skip ✗</button><button class="btn-add" type="button">Add to route ✓</button></div>'+
       '<p class="swipe-hint" style="text-align:center;margin:10px 0 0">'+(resIdx+1)+' of '+swResults.length+'  ·  swipe ✓ add / ✗ skip</p>';
     deck.appendChild(card);
+    var rbn=$('.res-banner .banner',card); if(rbn) applyPhoto(rbn, it);
     $('.res-map',card).addEventListener('click',function(){ closeNext(); focusOnMap(it); });
     $('.btn-skip',card).addEventListener('click',function(){ flyOff(card,'left',function(){ resIdx++; renderResult(); }); });
     $('.btn-add',card).addEventListener('click',function(){ toggleRoute(it.name); flyOff(card,'right',function(){ resIdx++; renderResult(); }); });
     makeDraggable(card,function(dir){ if(dir==='right'){ toggleRoute(it.name); } flyOff(card,dir,function(){ resIdx++; renderResult(); }); });
   }
+
+  // ---- location photos (Wikipedia thumbnails, online; the illustration is the fallback) ----
+  var PHOTO_CACHE={};
+  function fetchPhoto(w){
+    var key=w.l+':'+w.t;
+    if(PHOTO_CACHE[key]) return PHOTO_CACHE[key];
+    var p = (typeof fetch==='function')
+      ? fetch('https://'+w.l+'.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(w.t))
+          .then(function(r){ return r.ok?r.json():null; })
+          .then(function(j){ var src=j&&j.thumbnail&&j.thumbnail.source; return src? src.replace(/\/\d+px-/,'/640px-') : null; })
+          .catch(function(){ return null; })
+      : Promise.resolve(null);
+    PHOTO_CACHE[key]=p; return p;
+  }
+  function applyPhoto(banner, item){
+    if(!banner || !item || !item.wiki) return;
+    if(typeof navigator!=='undefined' && navigator.onLine===false) return;
+    fetchPhoto(item.wiki).then(function(url){
+      if(!url) return;
+      var img=new Image(); img.alt='';
+      img.onload=function(){ banner.innerHTML=''; banner.appendChild(img); };
+      img.onerror=function(){};
+      img.src=url;
+    });
+  }
+  var bannerObs = (typeof IntersectionObserver!=='undefined') ? new IntersectionObserver(function(ents){
+    ents.forEach(function(en){ if(en.isIntersecting){ var el=en.target; bannerObs.unobserve(el); applyPhoto(el, BYNAME[el.getAttribute('data-name')]); } });
+  },{rootMargin:'250px'}) : null;
 
   // ---- init ----
   // scripts are running: switch from the static fallback to the interactive app

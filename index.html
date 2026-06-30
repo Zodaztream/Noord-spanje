@@ -987,6 +987,43 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .phrase .m{display:block;font-size:13.5px;color:#26403c;margin-top:1px}
   .book-note{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;font-size:13.5px;line-height:1.5}
   .book-note b{color:var(--ink)}
+  /* ---- Trip view ---- */
+  .tripcta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;border:0;border-radius:16px;padding:15px;margin:2px 0 10px;font-size:15.5px;font-weight:700;color:#fff;background:linear-gradient(135deg,#1f6f6b,#102a2c);box-shadow:0 6px 18px rgba(16,42,44,.26)}
+  .tripcta svg{width:18px;height:18px}
+  .trip-card{max-height:95vh;padding-bottom:0}
+  .tripmap{height:36vh;min-height:230px;border-radius:14px;border:1px solid var(--line);overflow:hidden;position:relative;z-index:0;background:#dbe9e4}
+  .trip-legend{display:flex;gap:14px;justify-content:center;font-size:11.5px;color:var(--muted);padding:8px 0 4px}
+  .trip-legend i{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:-1px;margin-right:3px;border:1.5px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+  .trip-legend .lg-hotel{background:#1f6f6b} .trip-legend .lg-booked{background:#d6562f} .trip-legend .lg-stop{background:#d99a2b}
+  .trip-days{overflow:auto;flex:1;padding:2px 1px calc(env(safe-area-inset-bottom) + 14px)}
+  .tday{border:1px solid var(--line);border-radius:14px;padding:10px 13px;margin-bottom:9px;background:var(--surface)}
+  .tday-free{background:var(--surface-2)}
+  .tday.today{border-color:var(--persimmon);box-shadow:0 0 0 2px rgba(214,86,47,.16)}
+  .tday-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;cursor:pointer}
+  .tday-date{font-weight:700;font-size:13px;color:var(--ink)}
+  .tday.today .tday-date{color:var(--persimmon)}
+  .tday-base{margin-left:auto;font-size:12.5px;color:var(--sea);font-weight:600;text-align:right}
+  .tday-line{font-size:13.5px;margin-top:6px;color:#26403c}
+  .tday-line.booked{color:var(--ink)} .tday-line.booked b{color:var(--persimmon);margin-right:5px}
+  .tday-line.drive{color:var(--plum);font-weight:600}
+  .tday-line.free{color:var(--muted);font-style:italic}
+  .tday-line.note{color:var(--sea);font-weight:600}
+  .stopchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+  .stopchip{font-size:11.5px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:4px 10px}
+  .stopchip.linked{color:var(--sea);border-color:#cfe0da}
+  .tnear-btn{margin-top:9px;border:1px solid var(--line);background:var(--surface-2);color:var(--sea);border-radius:999px;padding:6px 13px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+  .tnear-btn .cnt{color:var(--persimmon)}
+  .tnear{margin-top:6px}
+  .tnear .row{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px dashed var(--line)}
+  .tnear .row .nm{font-weight:600;font-size:13px;color:var(--ink);line-height:1.25}
+  .tnear .row .nm small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+  .tnear .row .d{color:var(--persimmon);font-weight:700;font-size:11.5px;white-space:nowrap;margin-left:auto}
+  .tnear .row .acts{display:flex;gap:6px;flex-shrink:0}
+  .tnear .row a,.tnear .row button{font-size:11.5px;font-weight:600;border-radius:999px;padding:6px 10px;border:1px solid var(--line);background:#fff;color:var(--ink);text-decoration:none;white-space:nowrap}
+  .trip-hotel{width:26px;height:26px;border-radius:50%;background:#1f6f6b;color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+  .trip-booked{width:24px;height:24px;border-radius:50%;background:#d6562f;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
+  .trip-stop{width:14px;height:14px;border-radius:50%;background:#d99a2b;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+  .popmap{display:inline-block;margin-top:4px;color:#1f6f6b;font-weight:600;text-decoration:none}
 </style>
 </head>
 <body>
@@ -1025,6 +1062,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
 </div>
 
 <main id="appMain" hidden>
+  <button id="tripCta" class="tripcta" type="button">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3z"/><path d="M9 4v13M15 7v13"/></svg>
+    Your trip &mdash; plan &amp; map
+  </button>
   <button id="nextCta" class="nextcta" type="button">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.8L19 9.7l-3.8 3.2L16 18l-4-2.6L8 18l.8-5.1L5 9.7l5.1-1.9z"/></svg>
     What should we do next?
@@ -1104,6 +1145,19 @@ svg.leaflet-image-layer.leaflet-interactive path {
     <div class="modal-head"><span class="modal-title">Pintxos &amp; phrasebook</span><button id="bookClose" class="modal-close" aria-label="Close">×</button></div>
     <input id="bookSearch" class="book-search" type="search" placeholder="Search words or phrases…" autocomplete="off">
     <div id="bookBody" class="book-body"></div>
+  </div>
+</div>
+
+<div id="tripModal" class="modal" hidden>
+  <div class="modal-card trip-card" role="dialog" aria-modal="true" aria-label="Your trip">
+    <div class="modal-head"><span class="modal-title">Your trip</span><button id="tripClose" class="modal-close" aria-label="Close">×</button></div>
+    <div id="tripMap" class="tripmap"></div>
+    <div class="trip-legend">
+      <span><i class="lg-hotel"></i> stay</span>
+      <span><i class="lg-booked"></i> booked</span>
+      <span><i class="lg-stop"></i> en-route stop</span>
+    </div>
+    <div id="tripDays" class="trip-days"></div>
   </div>
 </div>
 
@@ -1737,6 +1791,36 @@ var WIKI = {
  'Santuario de Loyola':['Sanctuary of Loyola','en']
 };
 for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w].wiki={t:_wk[0], l:_wk[1]}; } }
+
+/* ---------- the family's booked itinerary (hotels, excursions, driving days) ---------- */
+var TRIP = {
+  hotels: [
+    {name:'Oar Cottage',        place:'Garai',            lat:43.183, lng:-2.626, in:'2026-06-25', out:'2026-06-29'},
+    {name:'Hotel Las Indianas', place:'Nueva de Llanes',  lat:43.440, lng:-4.835, in:'2026-06-29', out:'2026-07-02'},
+    {name:'El Gran Sueño',      place:'Pintueles',        lat:43.360, lng:-5.340, in:'2026-07-02', out:'2026-07-05'},
+    {name:'Posada La Lomba',    place:'Hermosa',          lat:43.372, lng:-3.715, in:'2026-07-05', out:'2026-07-08'},
+    {name:'Heredad de Unanue',  place:'San Sebastián',    lat:43.301, lng:-1.951, in:'2026-07-08', out:'2026-07-11'}
+  ],
+  booked: [
+    {date:'2026-06-27', time:'10:00', name:'Bilbao e-bike tour',           place:'Tourné, Villarías Kalea 1, Bilbao', lat:43.2605, lng:-2.9240},
+    {date:'2026-06-27', time:'20:00', name:'Dinner at Nerua (Guggenheim)', place:'Abandoibarra 2, Bilbao',            lat:43.2690, lng:-2.9340},
+    {date:'2026-06-28', time:'16:25', name:'San Juan de Gaztelugatxe',     place:'Gaztelugatxe parking',             lat:43.4457, lng:-2.7855},
+    {date:'2026-07-01', time:'09:00', name:'Ruta del Cares + Picos jeep',  place:'Poncebos',                         lat:43.2810, lng:-4.8460},
+    {date:'2026-07-03', time:'11:00', name:'Sella river canoe',           place:'Arriondas (RanaSella)',            lat:43.3880, lng:-5.1830},
+    {date:'2026-07-07', time:'09:15', name:'Santoña nature & cannery tour',place:'Santoña (meet Peñacastillo)',      lat:43.4427, lng:-3.4585}
+  ],
+  drives: [
+    {date:'2026-06-29', from:'Garai', to:'Nueva de Llanes', stops:['Castro Urdiales','Liérganes','Cartes','Santillana del Mar','Villapresente cypress labyrinth','Sequoia forest','San Vicente de la Barquera','Colombres & Quinta de Guadalupe','Llanes old town & harbour']},
+    {date:'2026-07-02', from:'Nueva de Llanes', to:'Pintueles', stops:['Bufones de Pría','Acantilados del Infierno','Ribadesella','Lastres']},
+    {date:'2026-07-05', from:'Pintueles', to:'Hermosa', stops:['Bufones de Pría','Llanes old town & harbour','Colombres & Quinta de Guadalupe','San Vicente de la Barquera','Sequoia forest']},
+    {date:'2026-07-08', from:'Hermosa', to:'San Sebastián', stops:['Santoña','Castro Urdiales','Flysch coast — Sakoneta','Mutriku','Deba']}
+  ]
+};
+/* coords for en-route stops that aren't in the 103-experience set */
+var EXTRA_COORDS = {
+  'Castro Urdiales':[43.383,-3.216], 'Ribadesella':[43.462,-5.058], 'Lastres':[43.512,-5.273],
+  'Acantilados del Infierno':[43.450,-4.950], 'Santoña':[43.4427,-3.4585]
+};
 
 </script>
 <script>
@@ -2450,6 +2534,134 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
     if(!body.children.length){ var e=ce('div','book-note'); e.textContent='No matches — try another word.'; body.appendChild(e); }
   }
 
+  // ---- Trip view (linked timeline + itinerary map) ----
+  var WK=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], MO=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var BOOKED_EXCLUDE={'San Juan de Gaztelugatxe':1,'Ruta del Cares':1};
+  function fmtDay(iso){ var d=new Date(iso+'T00:00:00Z'); return WK[d.getUTCDay()]+' '+d.getUTCDate()+' '+MO[d.getUTCMonth()]; }
+  function fmtDate(iso){ var d=new Date(iso+'T00:00:00Z'); return d.getUTCDate()+' '+MO[d.getUTCMonth()]; }
+  function nights(h){ return Math.round((Date.parse(h.out)-Date.parse(h.in))/86400000); }
+  function todayISO(){ try{ var n=new Date(); return n.getFullYear()+'-'+('0'+(n.getMonth()+1)).slice(-2)+'-'+('0'+n.getDate()).slice(-2);}catch(e){ return ''; } }
+  function stopCoord(n){ var it=byName(n); if(it&&it.lat!==undefined) return [it.lat,it.lng]; return EXTRA_COORDS[n]||null; }
+  function tripMapURL(name,place){ return 'https://maps.apple.com/?q='+encodeURIComponent((place||name)+', Spain'); }
+
+  function tripDays(){
+    var out=[], start=Date.UTC(2026,5,25), end=Date.UTC(2026,6,11), today=todayISO();
+    for(var t=start;t<=end;t+=86400000){
+      var iso=new Date(t).toISOString().slice(0,10);
+      var base=null; TRIP.hotels.forEach(function(h){ if(h.in<=iso && h.out>iso) base=h; });
+      var drive=null; TRIP.drives.forEach(function(d){ if(d.date===iso) drive=d; });
+      var items=TRIP.booked.filter(function(b){ return b.date===iso; });
+      var note=null;
+      if(iso==='2026-06-25') note='Hans & Maureen arrive';
+      else if(iso==='2026-06-26') note='Eska, Pelle & Felix arrive';
+      else if(iso==='2026-07-11') note='Departure — check-out';
+      var type = drive?'drive':(items.length?'booked':'free');
+      out.push({iso:iso,base:base,drive:drive,items:items,note:note,type:type,today:(iso===today)});
+    }
+    return out;
+  }
+  function nearbyTo(c,n){
+    var arr=[]; for(var i=0;i<EXP.length;i++){ var it=EXP[i]; if(it.lat===undefined||BOOKED_EXCLUDE[it.name]) continue; arr.push({it:it,d:haversine(c,[it.lat,it.lng])}); }
+    arr.sort(function(a,b){ return a.d-b.d; });
+    return arr.slice(0,n||3);
+  }
+
+  var tripMap=null, tripReady=false, tripLayers=null;
+  function tripIcon(html,cls,sz){ sz=sz||26; return L.divIcon({className:'',html:'<div class="'+cls+'">'+html+'</div>',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]}); }
+  function initTripMap(){
+    if(tripReady||!window.L) return;
+    try{
+      tripMap=L.map('tripMap',{zoomControl:true,attributionControl:false}).setView([43.3,-3.5],7);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(tripMap);
+      tripLayers=L.layerGroup().addTo(tripMap);
+      tripReady=true;
+      setTimeout(function(){ try{ tripMap.invalidateSize(); drawTrip(); }catch(e){} },220);
+    }catch(e){ tripReady=false; }
+  }
+  function drawTrip(){
+    if(!tripReady) return; tripLayers.clearLayers();
+    var pts=[];
+    L.polyline(TRIP.hotels.map(function(h){return [h.lat,h.lng];}),{color:'#1f6f6b',weight:3,opacity:.55,dashArray:'2,8'}).addTo(tripLayers);
+    TRIP.hotels.forEach(function(h,i){
+      var m=L.marker([h.lat,h.lng],{icon:tripIcon(String(i+1),'trip-hotel')});
+      m.bindPopup('<b>'+esc(h.name)+'</b><br>'+esc(h.place)+'<br>'+fmtDate(h.in)+' – '+fmtDate(h.out)+' · '+nights(h)+' night'+(nights(h)>1?'s':'')+
+        '<br><a class="popmap" href="'+tripMapURL(h.name,h.place)+'" target="_blank" rel="noopener">Open in Maps ›</a>');
+      m.addTo(tripLayers); h._m=m; pts.push([h.lat,h.lng]);
+    });
+    TRIP.booked.forEach(function(b){ if(b.lat==null) return;
+      var m=L.marker([b.lat,b.lng],{icon:tripIcon('★','trip-booked')});
+      m.bindPopup('<b>'+esc(b.name)+'</b><br>'+fmtDay(b.date)+(b.time?' · '+b.time:'')+'<br>'+esc(b.place)+
+        '<br><a class="popmap" href="'+tripMapURL(b.name,b.place)+'" target="_blank" rel="noopener">Open in Maps ›</a>');
+      m.addTo(tripLayers); pts.push([b.lat,b.lng]);
+    });
+    var seen={}; TRIP.drives.forEach(function(d){ d.stops.forEach(function(n){ if(seen[n]) return; seen[n]=1; var c=stopCoord(n); if(!c) return;
+      var it=byName(n), url=it?mapURL(it):tripMapURL(n);
+      var m=L.marker(c,{icon:tripIcon('','trip-stop',14)});
+      m.bindPopup('<b>'+esc(n)+'</b><br>en-route stop<br><a class="popmap" href="'+url+'" target="_blank" rel="noopener">Open in Maps ›</a>');
+      m.addTo(tripLayers); pts.push(c);
+    }); });
+    try{ tripMap.fitBounds(pts,{padding:[28,28]}); }catch(e){}
+  }
+  function focusTrip(c,zoom,html){
+    if(!tripReady) return; try{ tripMap.setView(c,zoom||12); if(html) L.popup().setLatLng(c).setContent(html).openOn(tripMap); }catch(e){}
+  }
+
+  function renderTimeline(){
+    var wrap=document.getElementById('tripDays'); if(!wrap) return; wrap.innerHTML='';
+    tripDays().forEach(function(day){
+      var row=ce('div','tday tday-'+day.type); if(day.today) row.classList.add('today');
+      var baseTxt = day.base ? (day.base.name+' · '+day.base.place) : (day.type==='free'?'':'—');
+      var html='<div class="tday-head"><div class="tday-date">'+fmtDay(day.iso)+(day.today?' · today':'')+'</div>'+
+               '<div class="tday-base">'+esc(baseTxt)+'</div></div>';
+      if(day.drive) html+='<div class="tday-line drive">Driving day: '+esc(day.drive.from)+' → '+esc(day.drive.to)+'</div>';
+      day.items.forEach(function(b){ html+='<div class="tday-line booked">'+(b.time?'<b>'+esc(b.time)+'</b>':'')+esc(b.name)+'</div>'; });
+      if(day.type==='free' && day.base) html+='<div class="tday-line free">Free day — open to explore</div>';
+      if(day.note) html+='<div class="tday-line note">'+esc(day.note)+'</div>';
+      row.innerHTML=html;
+
+      // tap the day head → focus its base on the map
+      if(day.base){
+        var hd=row.querySelector('.tday-head');
+        hd.addEventListener('click', function(){ if(day.base._m){ focusTrip([day.base.lat,day.base.lng],11); day.base._m.openPopup(); } });
+      }
+      // driving-day en-route stop chips (tappable → focus on map)
+      if(day.drive){
+        var chips=ce('div','stopchips');
+        day.drive.stops.forEach(function(n){ var c=stopCoord(n); if(!c) return;
+          var ch=ce('button','stopchip'+(byName(n)?' linked':'')); ch.type='button'; ch.textContent=n;
+          ch.addEventListener('click', function(){ focusTrip(c,12,'<b>'+esc(n)+'</b>'); });
+          chips.appendChild(ch);
+        });
+        row.appendChild(chips);
+      }
+      // nearby unbooked ideas from this day's base
+      var anchor = day.base; if(!anchor && day.drive){ TRIP.hotels.forEach(function(h){ if(h.place===day.drive.to) anchor=h; }); }
+      if(anchor){
+        var picks=nearbyTo([anchor.lat,anchor.lng],3);
+        var btn=ce('button','tnear-btn'); btn.type='button';
+        btn.innerHTML='Nearby ideas <span class="cnt">('+picks.length+')</span>';
+        var box=ce('div','tnear'); box.hidden=true;
+        picks.forEach(function(p){
+          var it=p.it, r=ce('div','row');
+          r.innerHTML='<div class="nm">'+esc(it.name)+'<small>'+esc(REGION[it.leg]||'')+'</small></div>'+
+            '<span class="d">'+fmtDist(p.d)+'</span>'+
+            '<div class="acts"><a href="'+mapURL(it)+'" target="_blank" rel="noopener">Maps</a>'+
+            '<button type="button" class="tn-map" data-lat="'+it.lat+'" data-lng="'+it.lng+'" data-nm="'+escA(it.name)+'">On map</button></div>';
+          box.appendChild(r);
+        });
+        if(day.type==='free') box.hidden=false; // free days: show ideas straight away
+        btn.addEventListener('click', function(){ box.hidden=!box.hidden; });
+        box.addEventListener('click', function(e){ var t=e.target.closest?e.target.closest('.tn-map'):null; if(!t) return;
+          focusTrip([parseFloat(t.getAttribute('data-lat')),parseFloat(t.getAttribute('data-lng'))],13,'<b>'+esc(t.getAttribute('data-nm'))+'</b>'); });
+        row.appendChild(btn); row.appendChild(box);
+      }
+      wrap.appendChild(row);
+    });
+  }
+  function scrollToToday(){ var wrap=document.getElementById('tripDays'); if(!wrap) return; var t=wrap.querySelector('.tday.today'); if(t) wrap.scrollTop=Math.max(0,t.offsetTop-wrap.offsetTop-8); }
+  function openTrip(){ var m=document.getElementById('tripModal'); if(!m) return; m.hidden=false; if(window.L) initTripMap(); renderTimeline(); setTimeout(scrollToToday,160); }
+  function closeTrip(){ var m=document.getElementById('tripModal'); if(m) m.hidden=true; }
+
   // ---- init ----
   // scripts are running: switch from the static fallback to the interactive app
   ['railWrap','noteBox','filterBox','appMain'].forEach(function(id){ var e=document.getElementById(id); if(e) e.hidden=false; });
@@ -2487,7 +2699,11 @@ for (var _w=0; _w<EXP.length; _w++){ var _wk=WIKI[EXP[_w].name]; if(_wk){ EXP[_w
   var bclose=document.getElementById('bookClose'); if(bclose) bclose.addEventListener('click', closeBook);
   var bsearch=document.getElementById('bookSearch'); if(bsearch) bsearch.addEventListener('input', function(){ renderBook(this.value); });
   var bmodal=document.getElementById('bookModal'); if(bmodal) bmodal.addEventListener('click', function(e){ if(e.target===bmodal) closeBook(); });
-  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeNext(); closeBook(); } });
+  // trip view
+  var tcta=document.getElementById('tripCta'); if(tcta) tcta.addEventListener('click', openTrip);
+  var tclose=document.getElementById('tripClose'); if(tclose) tclose.addEventListener('click', closeTrip);
+  var tmodal=document.getElementById('tripModal'); if(tmodal) tmodal.addEventListener('click', function(e){ if(e.target===tmodal) closeTrip(); });
+  document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeNext(); closeBook(); closeTrip(); } });
 })();
 
 </script>

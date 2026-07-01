@@ -1024,6 +1024,22 @@ svg.leaflet-image-layer.leaflet-interactive path {
   .trip-booked{width:24px;height:24px;border-radius:50%;background:#d6562f;color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4)}
   .trip-stop{width:14px;height:14px;border-radius:50%;background:#d99a2b;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35)}
   .popmap{display:inline-block;margin-top:4px;color:#1f6f6b;font-weight:600;text-decoration:none}
+  .pop-info{font-size:12.5px;line-height:1.4;margin:6px 0 4px;color:#26403c}
+  .pop-gtk{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:#1f6f6b;margin-top:4px}
+  .pop-tips{margin:3px 0 2px;padding-left:16px;font-size:12px;line-height:1.45}
+  .pop-tips li{margin-bottom:2px}
+  .tbk{border-top:1px solid var(--line);margin-top:8px;padding-top:8px}
+  .tday-drive .tbk,.tday-booked .tbk{margin-top:8px}
+  .tbk-head{display:flex;align-items:baseline;gap:8px;cursor:pointer}
+  .tbk-time{font-weight:700;font-size:12.5px;color:var(--persimmon);flex-shrink:0}
+  .tbk-name{font-size:13.5px;font-weight:600;color:var(--ink);flex:1}
+  .tbk-chev{font-size:11px;color:var(--sea);font-weight:600;white-space:nowrap}
+  .tbk-head.open .tbk-chev{color:var(--muted)}
+  .tbk-body{margin-top:6px}
+  .tbk-info{font-size:13px;line-height:1.5;color:#26403c;margin:0 0 6px}
+  .tbk-gtk{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--sea);margin-bottom:3px}
+  .tbk-tips{margin:0 0 2px;padding-left:17px;font-size:12.5px;line-height:1.5;color:var(--ink)}
+  .tbk-tips li{margin-bottom:3px}
 </style>
 </head>
 <body>
@@ -1802,12 +1818,24 @@ var TRIP = {
     {name:'Heredad de Unanue',  place:'San Sebastián',    lat:43.301, lng:-1.951, in:'2026-07-08', out:'2026-07-11'}
   ],
   booked: [
-    {date:'2026-06-27', time:'10:00', name:'Bilbao e-bike tour',           place:'Tourné, Villarías Kalea 1, Bilbao', lat:43.2605, lng:-2.9240},
-    {date:'2026-06-27', time:'20:00', name:'Dinner at Nerua (Guggenheim)', place:'Abandoibarra 2, Bilbao',            lat:43.2690, lng:-2.9340},
-    {date:'2026-06-28', time:'16:25', name:'San Juan de Gaztelugatxe',     place:'Gaztelugatxe parking',             lat:43.4457, lng:-2.7855},
-    {date:'2026-07-01', time:'09:00', name:'Ruta del Cares + Picos jeep',  place:'Poncebos',                         lat:43.2810, lng:-4.8460},
-    {date:'2026-07-03', time:'11:00', name:'Sella river canoe',           place:'Arriondas (RanaSella)',            lat:43.3880, lng:-5.1830},
-    {date:'2026-07-07', time:'09:15', name:'Santoña nature & cannery tour',place:'Santoña (meet Peñacastillo)',      lat:43.4427, lng:-3.4585}
+    {date:'2026-06-27', time:'10:00', name:'Bilbao e-bike tour',           place:'Tourné, Villarías Kalea 1, Bilbao', lat:43.2605, lng:-2.9240,
+      info:'3-hour guided e-bike tour of old and new Bilbao with a Dutch-speaking guide — the market hall, the old mining district and its street art, a striking cultural centre, the football stadium, Doña Casilda park, finishing at the Guggenheim.',
+      tips:['Meet at the Tourné office, Villarías Kalea 1 — arrive 15 min early.','Booking ref #349662653.','Organiser Tourné Bilbao: +34 688 749 372.']},
+    {date:'2026-06-27', time:'20:00', name:'Dinner at Nerua (Guggenheim)', place:'Abandoibarra 2, Bilbao',            lat:43.2690, lng:-2.9340,
+      info:'Table reserved for 5 at Nerua, the restaurant inside the Guggenheim Museum Bilbao.',
+      tips:['Food and drinks are chosen and paid for on the spot — not prepaid.','Address: Abandoibarra Etorbidea 2, Bilbao.']},
+    {date:'2026-06-28', time:'16:25', name:'San Juan de Gaztelugatxe',     place:'Gaztelugatxe parking',             lat:43.4457, lng:-2.7855,
+      info:'Timed entry to the hermitage on its island, reached via a 1.5 km path that drops steeply to the sea before climbing the 241-step stone stairway to the chapel.',
+      tips:['Ticket time has a 60-minute grace window.','Park at the trailhead next to restaurant Eneperi, or a second lot ~300 m down next to Bar 01 — arrive early in high season.','No toilets and only one drinking fountain on the route — bring water and sturdy shoes.','Booking code 840000103459-28866.']},
+    {date:'2026-07-01', time:'09:00', name:'Ruta del Cares + Picos jeep',  place:'Poncebos',                         lat:43.2810, lng:-4.8460,
+      info:'Morning: self-guided 11 km hike of the Ruta del Cares from Poncebos to Caín. Afternoon: guided jeep tour through the Picos de Europa — beech forests, valleys, historic villages and mountain peaks — with an English-speaking guide.',
+      tips:['Start the hike around 09:00; park early on the access road, next to the Bulnes cable car.','Lunch in Caín is at your own cost.','Meet the jeep guide at 15:00 at La Casona de Palmira (VivePicos, +34 647 995 361).','Back in Poncebos ~19:00 where the car is parked.','Bring suitable clothing, water, a snack and ID.']},
+    {date:'2026-07-03', time:'11:00', name:'Sella river canoe',           place:'Arriondas (RanaSella)',            lat:43.3880, lng:-5.1830,
+      info:'Self-paced canoe trip down the Sella river from Arriondas towards Ribadesella — choose a 7, 11 or 16 km route, marked by frog-logo signs along the way.',
+      tips:['Meet at RanaSella reception, Finca Fundición de Coviella 9, Arriondas (+34 985 841 282). Start any time between 11:00–14:30.','Wetsuits are €5 to rent in summer.','You get a waterproof barrel with a picnic per person — bring your phone to call for pickup at your chosen exit point.','Bring shoes that can get wet, swimwear, sunscreen, a towel and dry clothes.']},
+    {date:'2026-07-07', time:'09:15', name:'Santoña nature & cannery tour',place:'Santoña (meet Peñacastillo)',      lat:43.4427, lng:-3.4585,
+      info:'4.5-hour small-group tour with an English-speaking guide: visit an artisanal cannery to see how the local conserves are made by hand, then a boat trip through the bay and marshes to the Faro del Caballo and the Monte Buciero cliffs, finishing on Santoña\u2019s promenade and the San Martín fort.',
+      tips:['Pickup by minibus from the Centro Comercial Peñacastillo car park, 50 m right of the main entrance — arrive 15 min early.','Guide from Exploring Cantabria: +34 683 188 858.']}
   ],
   drives: [
     {date:'2026-06-29', from:'Garai', to:'Nueva de Llanes', stops:['Castro Urdiales','Liérganes','Cartes','Santillana del Mar','Villapresente cypress labyrinth','Sequoia forest','San Vicente de la Barquera','Colombres & Quinta de Guadalupe','Llanes old town & harbour']},
@@ -2590,8 +2618,11 @@ var EXTRA_COORDS = {
     });
     TRIP.booked.forEach(function(b){ if(b.lat==null) return;
       var m=L.marker([b.lat,b.lng],{icon:tripIcon('★','trip-booked')});
-      m.bindPopup('<b>'+esc(b.name)+'</b><br>'+fmtDay(b.date)+(b.time?' · '+b.time:'')+'<br>'+esc(b.place)+
-        '<br><a class="popmap" href="'+tripMapURL(b.name,b.place)+'" target="_blank" rel="noopener">Open in Maps ›</a>');
+      var pop='<b>'+esc(b.name)+'</b><br>'+fmtDay(b.date)+(b.time?' · '+b.time:'')+'<br>'+esc(b.place);
+      if(b.info) pop+='<p class="pop-info">'+esc(b.info)+'</p>';
+      if(b.tips&&b.tips.length) pop+='<div class="pop-gtk">Good to know</div><ul class="pop-tips">'+b.tips.map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ul>';
+      pop+='<a class="popmap" href="'+tripMapURL(b.name,b.place)+'" target="_blank" rel="noopener">Open in Maps ›</a>';
+      m.bindPopup(pop,{maxWidth:260});
       m.addTo(tripLayers); pts.push([b.lat,b.lng]);
     });
     var seen={}; TRIP.drives.forEach(function(d){ d.stops.forEach(function(n){ if(seen[n]) return; seen[n]=1; var c=stopCoord(n); if(!c) return;
@@ -2614,10 +2645,26 @@ var EXTRA_COORDS = {
       var html='<div class="tday-head"><div class="tday-date">'+fmtDay(day.iso)+(day.today?' · today':'')+'</div>'+
                '<div class="tday-base">'+esc(baseTxt)+'</div></div>';
       if(day.drive) html+='<div class="tday-line drive">Driving day: '+esc(day.drive.from)+' → '+esc(day.drive.to)+'</div>';
-      day.items.forEach(function(b){ html+='<div class="tday-line booked">'+(b.time?'<b>'+esc(b.time)+'</b>':'')+esc(b.name)+'</div>'; });
       if(day.type==='free' && day.base) html+='<div class="tday-line free">Free day — open to explore</div>';
       if(day.note) html+='<div class="tday-line note">'+esc(day.note)+'</div>';
       row.innerHTML=html;
+
+      // booked experiences — expandable info + good-to-know
+      day.items.forEach(function(b){
+        var blk=ce('div','tbk');
+        var head=ce('div','tbk-head'); head.setAttribute('role','button'); head.tabIndex=0;
+        head.innerHTML=(b.time?'<span class="tbk-time">'+esc(b.time)+'</span>':'')+'<span class="tbk-name">'+esc(b.name)+'</span><span class="tbk-chev">Details ›</span>';
+        var body=ce('div','tbk-body'); body.hidden=true;
+        var bh='';
+        if(b.info) bh+='<p class="tbk-info">'+esc(b.info)+'</p>';
+        if(b.tips&&b.tips.length) bh+='<div class="tbk-gtk">Good to know</div><ul class="tbk-tips">'+b.tips.map(function(t){return '<li>'+esc(t)+'</li>';}).join('')+'</ul>';
+        body.innerHTML=bh;
+        function toggle(){ body.hidden=!body.hidden; head.classList.toggle('open',!body.hidden); }
+        head.addEventListener('click',toggle);
+        head.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); } });
+        blk.appendChild(head); blk.appendChild(body);
+        row.appendChild(blk);
+      });
 
       // tap the day head → focus its base on the map
       if(day.base){
